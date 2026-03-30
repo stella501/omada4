@@ -1,0 +1,47 @@
+import board
+import digitalio
+import analogio
+import simpleio
+import time
+import pwmio
+from adafruit_motor import servo, motor
+
+# Initialize DC motors
+m1a = pwmio.PWMOut(board.GP8, frequency=10000)
+m1b = pwmio.PWMOut(board.GP9, frequency=10000)
+motor1 = motor.DCMotor(m1a, m1b)
+m2a = pwmio.PWMOut(board.GP10, frequency=10000)
+m2b = pwmio.PWMOut(board.GP11, frequency=10000)
+motor2 = motor.DCMotor(m2a, m2b)
+
+line = analogio.AnalogIn(board.GP26)   # Set pin 26 as analog INPUT
+sen_cal = digitalio.DigitalInOut(board.GP27)
+sen_cal.direction = digitalio.Direction.OUTPUT
+sen_cal.value = True
+
+def read_line_sensor():               # read line sensor function
+    return (line.value)
+
+while True:
+    line_value = read_line_sensor()
+    if line_value > 60000:    # All line
+        motor1.throttle = 0.6
+        motor2.throttle = -0.6
+    elif line_value > 40000:  # S5,S4+S5
+        motor1.throttle = 0.6
+        motor2.throttle = 0.4
+    elif line_value > 34000:  # S4,S3+S4
+        motor1.throttle = 0.6
+        motor2.throttle = -0.5       
+    elif line_value > 30000:  # S3
+        motor1.throttle = 0.6
+        motor2.throttle = -0.6
+    elif line_value > 22000:  # S2,S3,+S2
+        motor1.throttle = 0.5
+        motor2.throttle = -0.6
+    elif line_value > 10000:  # S1,S2+S1
+        motor1.throttle = -0.4
+        motor2.throttle = -0.6
+    elif line_value > 200:    # No line
+        motor1.throttle = 0.3
+        motor2.throttle = -0.3
